@@ -1,0 +1,151 @@
+<div class="container my-4">
+  <div class="row">
+    <div class="col-md-5 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">{{ isEditMode() ? 'Edit Employee' : 'Add New Employee' }}</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label class="form-label">Employee Name</label>
+              <input type="text" formControlName="employeeName" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Join Date</label>
+              <input type="date" formControlName="joinDate" class="form-control" />
+            </div>
+            <div class="form-check mb-3">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                formControlName="isActive"
+                id="isActive"
+              />
+              <label class="form-check-label">Is Active?</label>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Profile File</label>
+              <input
+                (change)="onFileSelected($event)"
+                class="form-control"
+                type="file"
+                accept="image/*"
+              />
+              @if (imagePreview()) {
+                <div class="mt-2">
+                  <img [src]="imagePreview()" style="max-height: 100px" />
+                </div>
+              }
+            </div>
+            <div class="mb-3 bg-light">
+              <div class="d-flex justify-content-between align-items-center">
+                <h6>Experiences</h6>
+                <button (click)="addExperience()"type="button" class="btn btn-outline-success btn-sm">
+                  +Add Experience
+                </button>
+              </div>
+              <div formArrayName="experiences">
+                @for (exp of experiences.controls; track exp; let i = $index) {
+                  <div [formGroupName]="i" class="row align-items-center mb-2">
+                    <div class="col-md-6">
+                      <select
+                        formControlName="experienceTitleId"
+                        class="form-select form-select-sm">
+                        <option [value]="0">Select Title</option>
+                        @for (t of titles(); track t.experienceTitleId) {
+                          <option [value]="t.experienceTitleId">{{t.titleName}}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <input type="number" formControlName="duration" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                      <button
+                        (click)="removeExprience(i)"
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"> &times;</button>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-outline-success">
+                  {{isEditMode() ? 'Update' : 'Save' }}
+                </button>
+                <button type="button" class="btn btn-outline-danger" (click)="resetForm()">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-7 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">Employee List</h4>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Join Date</th>
+                <th>Experiences</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (emp of employees(); track emp.employeeId) {
+                <tr>
+                  <td>
+                    <img
+                      [src]="emp.imageUrl ? serverUrl + emp.imageUrl : 'images/noimage.png'"
+                      style="width: 45px; height: 45px; object-fit: cover"
+                    />
+                  </td>
+                  <td>{{ emp.employeeName }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="emp.isActive ? ' bg-success' : 'bg-secondary'">{{
+                      emp.isActive ? 'Active' : 'Inactive'
+                    }}</span>
+                  </td>
+                  <td>{{ emp.joinDate | date: 'yyyy-MM-dd' }}</td>
+                  <td>
+                    <ul class="list-unstyled mb-0 small">
+                      @for (exp of emp.experiences; track $index) {
+                        <li>{{ exp.experienceTitle.titleName }}: {{ exp.duration }} yrs</li>
+                      }
+                    </ul>
+                  </td>
+                  <td>
+                    <button
+                      (click)="editEmployee(emp)"
+                      type="button"
+                      class="btn btn-outline-primary btn-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      (click)="deleteEmployee(emp.employeeId)"
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
